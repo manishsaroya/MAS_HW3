@@ -3,16 +3,16 @@ import matplotlib.pyplot as plt
 import copy
 
 # Number of Agents
-numAgents = 60
+numAgents = 30
 
 # Number of Nights 
-numNights = 5
+numNights = 7
 
 # Optimal Number of agents at each night
-numOptimalAgents = 4
+numOptimalAgents = 5
 
 # learning rate 
-alpha = 0.5
+alpha = 0.1
 
 # exploration rate
 epsilon = 0.1
@@ -91,7 +91,7 @@ def computeGlobalReward(attendance,actions):
 
 
 # Visualization
-fig = plt.figure(figsize=(12, 12))
+fig = plt.figure(figsize=(4, 4))
 #im = plt.imshow(, origin={'lower','left'})
 
 if __name__ == '__main__':
@@ -105,12 +105,63 @@ if __name__ == '__main__':
         #updateGlobalRewardEstimates(atten,actions) 
         updateDifferenceRewardEstimates(atten, actions)
         rewardList.append(computeGlobalReward(atten,actions))
+        epsilon *= 0.999
+        print epsilon
     #print rewardEstimates 
     print rewardList
     print a
-    plt.plot(rewardList)
+    plt.plot(rewardList,label='Difference Reward')
     plt.ylabel('Global Reward')
     plt.xlabel('No. of Episodes')
+
+    rewardEstimates = np.zeros((numAgents, numNights))
+    epsilon = 0.1
+
+    # Making all plots in one
+    rewardList1 = []
+    a1 = []
+    for i in range(500):
+        atten, actions = takeActions()
+        a1 = atten
+        #updateLocalRewardEstimates(atten,actions)
+        updateGlobalRewardEstimates(atten,actions)
+        #updateDifferenceRewardEstimates(atten, actions)
+        rewardList1.append(computeGlobalReward(atten,actions))
+        epsilon *= 0.999
+        print epsilon
     
+    plt.plot(rewardList1,label='Global Reward')
+
+
+    rewardEstimates = np.zeros((numAgents, numNights))
+    epsilon = 0.1
+
+    # Making all plots in one
+    rewardList2 = []
+    a2 = []
+    for i in range(500):
+        atten, actions = takeActions()
+        a2 = atten
+        updateLocalRewardEstimates(atten,actions)
+        #updateGlobalRewardEstimates(atten,actions)
+        #updateDifferenceRewardEstimates(atten, actions)
+        rewardList2.append(computeGlobalReward(atten,actions))
+        epsilon *= 0.999
+        print epsilon
+    
+    plt.plot(rewardList2,label='Local Reward')
+
+    # ploting the histogram
+    # fixed bin size
+    #plt.figure(figsize=(12, 12))
+    #bins = np.arange(0, numNights, 1) # fixed bin size
+
+    #plt.xlim([min(a)-5, max(a)+5])
+
+    #plt.hist(a, bins=bins, alpha=0.5)
+    #plt.title('Random Gaussian data (fixed bin size)')
+    #plt.xlabel('variable X (bin size = 5)')
+    #plt.ylabel('count')
+plt.legend()    
 plt.show()
 
