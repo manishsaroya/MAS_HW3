@@ -12,12 +12,18 @@ numOptimalAgents = 1
 # learning rate 
 alpha = 0.5
 
+# exploration rate
+epsilon = 0.3
+
 def takeActions():
     attendance = np.zeros(numNights)
     actions = np.zeros(numAgents)
     print "attendance", attendance
     for i in range(numAgents):
-        action = np.random.randint(0,numNights)
+        if np.random.uniform(0,1) < epsilon:
+            action = np.random.randint(0,numNights)
+        else:
+            action = np.argmax(rewardEstimates[i])
         actions[i] = action
         attendance[action] += 1
     print "post attendance", attendance
@@ -37,6 +43,9 @@ def updateRewardEstimates(attendance,actions):
         
 
     
+# Visualization
+#fig = plt.figure(figsize=(12, 12))
+#im = plt.imshow(, origin={'lower','left'})
 
 
 if __name__ == '__main__':
