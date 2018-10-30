@@ -39,7 +39,7 @@ def updateLocalRewardEstimates(attendance,actions):
     for agent, action in enumerate(actions):
         #print attendance[int(action)]
         #print (-1 * attendance[int(action)])/numOptimalAgents
-        sample = np.exp((-1 * attendance[int(action)])/numOptimalAgents)
+        sample = attendance[int(action)] * np.exp((-1 * attendance[int(action)])/numOptimalAgents)
         rewardEstimates[agent][int(action)] = (1-alpha) * rewardEstimates[agent][int(action)] + alpha * sample
 
 def updateGlobalRewardEstimates(attendance,actions):
@@ -83,6 +83,13 @@ def updateDifferenceRewardEstimates(attendance,actions):
         #print sample
         rewardEstimates[agent][int(action)] = (1-alpha) * rewardEstimates[agent][int(action)] + alpha * sample
 
+def updateDifferenceRewardEstimatesAbsence(attendance,actions):
+    globalSample = computeGlobalReward(attendance,actions)
+    for agent, action in enumerate(actions):
+        atte, act = counterfactualActionAbsence(copy.copy(attendance),copy.copy(actions),agent)
+        sample = globalSample - computeGlobalReward(atte,act)
+        rewardEstimates[agent][int(action)] = (1-alpha) * rewardEstimates[agent][int(action)] + alpha * sample
+
 def computeGlobalReward(attendance,actions):
     globalReward = 0
     for i in range(numNights):
@@ -109,8 +116,8 @@ if __name__ == '__main__':
         print epsilon
     #print rewardEstimates 
     print rewardList
-    print a
-    plt.plot(rewardList,label='Difference Reward')
+    print "Difference", a
+    plt.plot(rewardList,label='Difference Reward c_i-random action')
     plt.ylabel('Global Reward')
     plt.xlabel('No. of Episodes')
 
@@ -129,7 +136,7 @@ if __name__ == '__main__':
         rewardList1.append(computeGlobalReward(atten,actions))
         epsilon *= 0.999
         print epsilon
-    
+    print "Global", a1 
     plt.plot(rewardList1,label='Global Reward')
 
 
@@ -148,8 +155,27 @@ if __name__ == '__main__':
         rewardList2.append(computeGlobalReward(atten,actions))
         epsilon *= 0.999
         print epsilon
-    
+    print "Local", a2
     plt.plot(rewardList2,label='Local Reward')
+
+
+    rewardEstimates = np.zeros((numAgents, numNights))
+    epsilon = 0.1
+
+    # Making all plots in one
+    rewardList3 = []
+    a3 = []
+    for i in range(500):
+        atten, actions = takeActions()
+        a3 = atten
+        #updateLocalRewardEstimates(atten,actions)
+        #updateGlobalRewardEstimates(atten,actions)
+        updateDifferenceRewardEstimatesAbsence(atten, actions)
+        rewardList3.append(computeGlobalReward(atten,actions))
+        epsilon *= 0.999
+        print epsilon
+    print "Local", a3
+    plt.plot(rewardList3,label='Difference Reward c_i-No action')
 
     # ploting the histogram
     # fixed bin size
